@@ -13,6 +13,8 @@ export interface Organization {
   slug: string;
   description?: string;
   logo?: string;
+  type?: string;
+  address?: string;
 }
 
 export interface Room {
@@ -28,6 +30,9 @@ export interface Room {
     endTime: string; // "18:00"
   };
   pricePerHour: number;
+  location?: string;
+  isAvailable?: boolean;
+  resources?: string[];
 }
 
 export interface Event {
@@ -44,6 +49,13 @@ export interface Event {
   status: 'pending' | 'confirmed' | 'cancelled';
   publicLink?: string;
   attendees: Attendee[];
+  // Propriedades derivadas para compatibilidade
+  organizationId?: string;
+  createdBy?: string;
+  date?: string;
+  startTime?: string;
+  endTime?: string;
+  roomName?: string;
 }
 
 export interface Attendee {

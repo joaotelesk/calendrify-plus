@@ -2,12 +2,11 @@ import { useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Switch } from '@/components/ui/switch';
 import { Badge } from '@/components/ui/badge';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Calendar } from '@/components/ui/calendar';
-import { rooms, getRoomsByOrganization } from '@/data/mockData';
-import { ChevronLeft, ChevronRight, X } from 'lucide-react';
+import { Progress } from '@/components/ui/progress';
+import { getRoomsByOrganization } from '@/data/mockData';
+import { ChevronLeft, ChevronRight, MapPin, Users, Monitor, Wifi, Car, CreditCard, Calendar as CalendarIcon, Clock, Repeat } from 'lucide-react';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
@@ -16,11 +15,13 @@ import { useToast } from '@/hooks/use-toast';
 export const CreateEvent = () => {
   const { user } = useAuth();
   const { toast } = useToast();
+  const [currentStep, setCurrentStep] = useState(1);
   const [selectedDate, setSelectedDate] = useState<Date>();
   const [selectedRoom, setSelectedRoom] = useState<string>('');
   const [selectedTime, setSelectedTime] = useState<string>('');
   const [duration, setDuration] = useState<string>('1');
-  const [isRecurring, setIsRecurring] = useState(false);
+  const [recurrence, setRecurrence] = useState<string>('');
+  const [paymentProcessing, setPaymentProcessing] = useState(false);
 
   if (!user) return null;
 

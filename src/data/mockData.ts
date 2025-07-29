@@ -6,14 +6,18 @@ export const organizations: Organization[] = [
     name: 'Universidade Tech',
     slug: 'uni-tech',
     description: 'Centro de inovação e tecnologia',
-    logo: '🎓'
+    logo: '🎓',
+    type: 'Universidade',
+    address: 'Av. Tecnologia, 123 - São Paulo, SP'
   },
   {
     id: '2',
     name: 'Coworking Creative',
     slug: 'coworking-creative',
     description: 'Espaço colaborativo para profissionais criativos',
-    logo: '🚀'
+    logo: '🚀',
+    type: 'Coworking',
+    address: 'Rua da Criatividade, 456 - Rio de Janeiro, RJ'
   }
 ];
 
@@ -65,7 +69,10 @@ export const rooms: Room[] = [
       startTime: '08:00',
       endTime: '22:00'
     },
-    pricePerHour: 150
+    pricePerHour: 150,
+    location: 'Prédio A - Térreo',
+    isAvailable: true,
+    resources: ['Projetor', 'Wi-Fi', 'Estacionamento']
   },
   {
     id: '2',
@@ -79,7 +86,10 @@ export const rooms: Room[] = [
       startTime: '07:00',
       endTime: '23:00'
     },
-    pricePerHour: 80
+    pricePerHour: 80,
+    location: 'Prédio B - 2º Andar',
+    isAvailable: true,
+    resources: ['Projetor', 'Wi-Fi']
   },
   {
     id: '3',
@@ -93,7 +103,10 @@ export const rooms: Room[] = [
       startTime: '06:00',
       endTime: '24:00'
     },
-    pricePerHour: 120
+    pricePerHour: 120,
+    location: 'Prédio A - 3º Andar',
+    isAvailable: false,
+    resources: ['Projetor', 'Wi-Fi', 'Estacionamento']
   },
   {
     id: '4',
@@ -107,7 +120,10 @@ export const rooms: Room[] = [
       startTime: '08:00',
       endTime: '20:00'
     },
-    pricePerHour: 90
+    pricePerHour: 90,
+    location: 'Andar Coworking',
+    isAvailable: true,
+    resources: ['Wi-Fi']
   }
 ];
 
@@ -139,7 +155,14 @@ export const events: Event[] = [
         email: 'pedro@email.com',
         status: 'pending'
       }
-    ]
+    ],
+    // Propriedades derivadas
+    organizationId: '1',
+    createdBy: '2',
+    date: '2025-01-30',
+    startTime: '14:00',
+    endTime: '17:00',
+    roomName: 'Lab de Informática'
   },
   {
     id: '2',
@@ -173,7 +196,14 @@ export const events: Event[] = [
         email: 'ana@dev.com',
         status: 'pending'
       }
-    ]
+    ],
+    // Propriedades derivadas
+    organizationId: '1',
+    createdBy: '2',
+    date: '2025-02-05',
+    startTime: '19:00',
+    endTime: '21:00',
+    roomName: 'Auditório Principal'
   },
   {
     id: '3',
@@ -186,7 +216,14 @@ export const events: Event[] = [
     isPublic: false,
     price: 360,
     status: 'pending',
-    attendees: []
+    attendees: [],
+    // Propriedades derivadas
+    organizationId: '1',
+    createdBy: '1',
+    date: '2025-02-10',
+    startTime: '09:00',
+    endTime: '12:00',
+    roomName: 'Sala de Reunião VIP'
   }
 ];
 

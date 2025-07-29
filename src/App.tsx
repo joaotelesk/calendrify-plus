@@ -11,6 +11,12 @@ import { Dashboard } from "@/pages/Dashboard";
 import { RoomsManagement } from "@/pages/RoomsManagement";
 import { CreateEvent } from "@/pages/CreateEvent";
 import { PublicEvents } from "@/pages/PublicEvents";
+import { MyAgenda } from "@/pages/MyAgenda";
+import { MyEvents } from "@/pages/MyEvents";
+import { AvailableRooms } from "@/pages/AvailableRooms";
+import { MyRegistrations } from "@/pages/MyRegistrations";
+import { Users } from "@/pages/Users";
+import { Settings } from "@/pages/Settings";
 
 const queryClient = new QueryClient();
 
@@ -46,12 +52,15 @@ const App = () => (
                 </ProtectedRoute>
               }>
                 <Route path="dashboard" element={<Dashboard />} />
+                <Route path="agenda" element={<MyAgenda />} />
                 <Route path="rooms" element={<RoomsManagement />} />
+                <Route path="users" element={<Users />} />
+                <Route path="settings" element={<Settings />} />
                 <Route path="create-event" element={<CreateEvent />} />
+                <Route path="my-events" element={<MyEvents />} />
+                <Route path="available-rooms" element={<AvailableRooms />} />
                 <Route path="public-events" element={<PublicEvents />} />
-                <Route path="agenda" element={<Dashboard />} />
-                <Route path="available-rooms" element={<RoomsManagement />} />
-                <Route path="my-events" element={<Dashboard />} />
+                <Route path="my-registrations" element={<MyRegistrations />} />
               </Route>
             </Routes>
           </BrowserRouter>

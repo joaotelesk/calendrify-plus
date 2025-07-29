@@ -1,9 +1,10 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { User } from '@/types';
-import { currentUser, loginUser } from '@/data/mockData';
+import { User, Organization } from '@/types';
+import { currentUser, loginUser, organizations } from '@/data/mockData';
 
 interface AuthContextType {
   user: User | null;
+  organization: Organization | null;
   isLoading: boolean;
   login: (email: string) => Promise<boolean>;
   logout: () => void;
@@ -55,8 +56,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setUser(null);
   };
 
+  // Buscar organização do usuário
+  const organization = user ? organizations.find(org => org.id === user.organizationId) || null : null;
+
   const value: AuthContextType = {
     user,
+    organization,
     isLoading,
     login,
     logout,
