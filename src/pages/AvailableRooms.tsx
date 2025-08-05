@@ -1,31 +1,48 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { getRoomsByOrganization } from '@/data/mockData';
-import { Search, MapPin, Users, Monitor, Wifi, Car } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { MapPin, Users, Wifi, Car, Coffee, Zap, Search, Monitor } from 'lucide-react';
+import { Room } from '@/types';
+import { roomService } from '@/services/api';
 
-export const AvailableRooms = () => {
+export default function AvailableRooms() {
   const { user } = useAuth();
+  const [rooms, setRooms] = useState<Room[]>([]);
+  const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
-  const [capacityFilter, setCapacityFilter] = useState<string>('all');
+  const [capacityFilter, setCapacityFilter] = useState('');
 
-  if (!user) return null;
+  useEffect(() => {
+    const fetchRooms = async () => {
+      if (!user?.organizationId) return;
+      
+      try {
+        setLoading(true);
+        const roomsData = await roomService.getByOrganization(user.organizationId);
+        setRooms(roomsData);
+      } catch (error) {
+        console.error('Failed to fetch rooms:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  const orgRooms = getRoomsByOrganization(user.organizationId);
+    fetchRooms();
+  }, [user?.organizationId]);
 
-  const filteredRooms = orgRooms.filter(room => {
+  const filteredRooms = rooms.filter((room) => {
     const matchesSearch = room.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         room.location.toLowerCase().includes(searchTerm.toLowerCase());
+      room.location?.toLowerCase().includes(searchTerm.toLowerCase());
     
-    const matchesCapacity = capacityFilter === 'all' || 
-                           (capacityFilter === 'small' && room.capacity <= 10) ||
-                           (capacityFilter === 'medium' && room.capacity > 10 && room.capacity <= 30) ||
-                           (capacityFilter === 'large' && room.capacity > 30);
-
+    const matchesCapacity = capacityFilter === '' || 
+      (capacityFilter === '1-5' && room.capacity <= 5) ||
+      (capacityFilter === '6-20' && room.capacity >= 6 && room.capacity <= 20) ||
+      (capacityFilter === '21+' && room.capacity >= 21);
+    
     return matchesSearch && matchesCapacity;
   });
 

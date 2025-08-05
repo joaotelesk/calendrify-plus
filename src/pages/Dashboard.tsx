@@ -1,47 +1,106 @@
+import { useEffect, useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { rooms, events, getEventsByOrganization } from '@/data/mockData';
-import { Calendar, Users, MapPin, Clock, TrendingUp, Plus } from 'lucide-react';
+import { Calendar, Users, MapPin, Plus, DollarSign, Clock, TrendingUp } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
-import { Link } from 'react-router-dom';
+import { Event, Room } from '@/types';
+import { eventService, roomService, statsService } from '@/services/api';
 
-export const Dashboard = () => {
+interface DashboardStats {
+  totalRooms: number;
+  totalEvents: number;
+  upcomingEvents: number;
+  totalRevenue: number;
+}
+
+export default function Dashboard() {
   const { user, isAdmin, isTeacher, isStudent } = useAuth();
-  
-  if (!user) return null;
-  
-  const orgEvents = getEventsByOrganization(user.organizationId);
-  const upcomingEvents = orgEvents
-    .filter(event => event.startDate > new Date())
-    .sort((a, b) => a.startDate.getTime() - b.startDate.getTime())
-    .slice(0, 3);
+  const [stats, setStats] = useState<DashboardStats>({
+    totalRooms: 0,
+    totalEvents: 0,
+    upcomingEvents: 0,
+    totalRevenue: 0
+  });
+  const [upcomingEvents, setUpcomingEvents] = useState<Event[]>([]);
+  const [featuredRooms, setFeaturedRooms] = useState<Room[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const stats = {
-    totalRooms: rooms.filter(room => room.organizationId === user.organizationId).length,
-    totalEvents: orgEvents.length,
-    upcomingEvents: upcomingEvents.length,
-    revenue: orgEvents.reduce((acc, event) => acc + event.price, 0)
-  };
+  useEffect(() => {
+    const fetchDashboardData = async () => {
+      if (!user?.organizationId) return;
+      
+      try {
+        setLoading(true);
+        
+        // Fetch stats
+        const dashboardStats = await statsService.getDashboardStats(user.organizationId);
+        setStats(dashboardStats);
+        
+        // Fetch events
+        const events = await eventService.getAll({ 
+          organizationId: user.organizationId,
+          status: 'confirmed'
+        });
+        
+        const upcoming = events
+          .filter(event => new Date(event.startDate) > new Date())
+          .sort((a, b) => new Date(a.startDate).getTime() - new Date(b.startDate).getTime())
+          .slice(0, 5);
+        setUpcomingEvents(upcoming);
+        
+        // Fetch rooms
+        const rooms = await roomService.getByOrganization(user.organizationId);
+        setFeaturedRooms(rooms.slice(0, 3));
+        
+      } catch (error) {
+        console.error('Failed to fetch dashboard data:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchDashboardData();
+  }, [user?.organizationId]);
+
+  if (loading) {
+    return (
+      <div className="space-y-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          {[...Array(4)].map((_, i) => (
+            <Card key={i} className="animate-pulse">
+              <CardContent className="p-6">
+                <div className="h-4 bg-muted rounded w-3/4 mb-2"></div>
+                <div className="h-8 bg-muted rounded w-1/2"></div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h1 className="text-3xl font-bold">Dashboard</h1>
+          <h1 className="text-3xl font-bold">
+            Olá, {user?.name?.split(' ')[0]}! 👋
+          </h1>
           <p className="text-muted-foreground">
-            Bem-vindo de volta, {user.name}!
+            Bem-vindo ao seu painel de controle
           </p>
         </div>
         
         {(isAdmin || isTeacher) && (
-          <Button asChild className="bg-gradient-primary hover:shadow-primary">
-            <Link to={isAdmin ? "/rooms" : "/create-event"}>
-              <Plus className="mr-2 h-4 w-4" />
-              {isAdmin ? 'Nova Sala' : 'Criar Evento'}
+          <Button asChild className="gap-2">
+            <Link to={isAdmin ? "/rooms/manage" : "/events/create"}>
+              <Plus className="h-4 w-4" />
+              {isAdmin ? "Nova Sala" : "Novo Evento"}
             </Link>
           </Button>
         )}
@@ -100,7 +159,7 @@ export const Dashboard = () => {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">
-                R$ {stats.revenue.toLocaleString('pt-BR')}
+                R$ {stats.totalRevenue.toLocaleString('pt-BR')}
               </div>
               <p className="text-xs text-muted-foreground">
                 +8% desde o mês passado
@@ -129,7 +188,7 @@ export const Dashboard = () => {
               </p>
             ) : (
               upcomingEvents.map((event) => {
-                const room = rooms.find(r => r.id === event.roomId);
+                const room = featuredRooms.find(r => r.id === event.roomId);
                 return (
                   <div key={event.id} className="flex items-start gap-3 p-3 rounded-lg border bg-card hover:bg-muted/50 transition-colors">
                     <div className="w-2 h-2 rounded-full bg-primary mt-2" />
@@ -179,10 +238,7 @@ export const Dashboard = () => {
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            {rooms
-              .filter(room => room.organizationId === user.organizationId)
-              .slice(0, 3)
-              .map((room) => (
+            {featuredRooms.map((room) => (
                 <div key={room.id} className="flex items-center gap-3 p-3 rounded-lg border bg-card hover:bg-muted/50 transition-colors">
                   <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center">
                     <MapPin className="h-6 w-6 text-primary" />

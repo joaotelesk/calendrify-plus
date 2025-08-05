@@ -20,7 +20,9 @@ export default function LoginForm({
 
   const handleGoogleLogin = async (credential: string) => {
     const success = await login(credential);
-    if (success) navigate("/dashboard");
+    if (success) {
+      navigate("/dashboard");
+    }
   };
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
