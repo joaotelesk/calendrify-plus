@@ -25,38 +25,92 @@ export const useAuth = () => {
 const mockUsers = [
   {
     id: "1",
-    name: "Admin User",
-    email: "admin@example.com",
+    name: "Admin Bruno",
+    email: "admin@unitech.com",
     role: "admin" as const,
-    organizationId: "org1",
+    organizationId: "1",
     picture: "https://via.placeholder.com/40"
   },
   {
     id: "2", 
-    name: "Professor Silva",
-    email: "professor@example.com",
+    name: "Prof. Max pau no cu",
+    email: "maria@unitech.com",
     role: "teacher" as const,
-    organizationId: "org1",
+    organizationId: "1",
     picture: "https://via.placeholder.com/40"
   },
   {
     id: "3",
-    name: "João Student", 
-    email: "student@example.com",
+    name: "João Estudante", 
+    email: "joao@unitech.com",
     role: "student" as const,
-    organizationId: "org1",
+    organizationId: "1",
+    picture: "https://via.placeholder.com/40"
+  },
+  {
+    id: "4",
+    name: "Ana Designer",
+    email: "ana@creative.com",
+    role: "teacher" as const,
+    organizationId: "2",
     picture: "https://via.placeholder.com/40"
   }
 ];
 
-const mockOrganization: Organization = {
-  id: "org1",
-  name: "Universidade Exemplo",
-  slug: "universidade-exemplo",
-  description: "Uma universidade de exemplo para demonstração",
-  type: "Universidade",
-  address: "Rua Exemplo, 123 - São Paulo, SP"
-};
+const mockOrganizations: Organization[] = [
+  {
+    id: "1",
+    name: "Mp acessorios de bateria",
+    slug: "uni-tech",
+    description: "Centro de inovação e tecnologia",
+    logo: "🎓",
+    type: "Universidade",
+    address: "Av. Tecnologia, 123 - São Paulo, SP",
+  },
+];
+
+const mockRooms = [
+  {
+    id: "1",
+    name: "Sala de bateria premium",
+    description: "Auditório com capacidade para grandes eventos",
+    capacity: 4,
+    equipment: [
+      "Projetor 4K",
+      "Sistema de Som",
+      "bateria pearl",
+      "Ar Condicionado",
+      "metronomo",
+    ],
+    organizationId: "1",
+    availability: {
+      days: [1, 2, 3, 4, 5], // Mon-Fri
+      startTime: "08:00",
+      endTime: "22:00",
+    },
+    pricePerHour: 150,
+    location: "Mp - 1º Andar",
+    isAvailable: true,
+    resources: ["Wi-Fi", "Estacionamento"],
+  },
+  {
+    id: "2",
+    name: "Sala de bateria basica",
+    description: "Laboratório com 30 computadores",
+    capacity: 2,
+    equipment: ["30 Computadores", "Projetor", "Quadro Digital", "Wi-Fi"],
+    organizationId: "1",
+    availability: {
+      days: [1, 2, 3, 4, 5],
+      startTime: "07:00",
+      endTime: "23:00",
+    },
+    pricePerHour: 80,
+    location: "Mp - 1º Andar",
+    isAvailable: true,
+    resources: [""],
+  },
+];
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
@@ -74,7 +128,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
           const userData = localStorage.getItem("user_data");
           if (userData) {
             setUser(JSON.parse(userData));
-            setOrganization(mockOrganization);
+            setOrganization(mockOrganizations[0]);
           }
         }
       } catch (error) {
@@ -105,7 +159,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
         localStorage.setItem("auth_token", googleToken);
         localStorage.setItem("user_data", JSON.stringify(foundUser));
         setUser(foundUser);
-        setOrganization(mockOrganization);
+        setOrganization(mockOrganizations[0]);
         return true;
       } else {
         // Create new user for demo
@@ -121,7 +175,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
         localStorage.setItem("auth_token", googleToken);
         localStorage.setItem("user_data", JSON.stringify(newUser));
         setUser(newUser);
-        setOrganization(mockOrganization);
+        setOrganization(mockOrganizations[0]);
         return true;
       }
     } catch (error) {
