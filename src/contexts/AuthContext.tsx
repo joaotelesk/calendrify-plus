@@ -1,5 +1,4 @@
 import { Organization, User } from "@/types";
-import { authService } from "@/services/api";
 import { jwtDecode } from "jwt-decode";
 import React, { createContext, useContext, useEffect, useState } from "react";
 
@@ -22,6 +21,43 @@ export const useAuth = () => {
   return context;
 };
 
+// Mock data para simulação
+const mockUsers = [
+  {
+    id: "1",
+    name: "Admin User",
+    email: "admin@example.com",
+    role: "admin" as const,
+    organizationId: "org1",
+    picture: "https://via.placeholder.com/40"
+  },
+  {
+    id: "2", 
+    name: "Professor Silva",
+    email: "professor@example.com",
+    role: "teacher" as const,
+    organizationId: "org1",
+    picture: "https://via.placeholder.com/40"
+  },
+  {
+    id: "3",
+    name: "João Student", 
+    email: "student@example.com",
+    role: "student" as const,
+    organizationId: "org1",
+    picture: "https://via.placeholder.com/40"
+  }
+];
+
+const mockOrganization: Organization = {
+  id: "org1",
+  name: "Universidade Exemplo",
+  slug: "universidade-exemplo",
+  description: "Uma universidade de exemplo para demonstração",
+  type: "Universidade",
+  address: "Rua Exemplo, 123 - São Paulo, SP"
+};
+
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
@@ -30,21 +66,21 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const initAuth = async () => {
+    const initAuth = () => {
       try {
         const token = localStorage.getItem("auth_token");
         if (token) {
-          const currentUser = await authService.getCurrentUser();
-          setUser(currentUser);
-          
-          // Fetch organization data
-          // You'll need to implement organizationService.getById
-          // const org = await organizationService.getById(currentUser.organizationId);
-          // setOrganization(org);
+          // Simulate getting user from token
+          const userData = localStorage.getItem("user_data");
+          if (userData) {
+            setUser(JSON.parse(userData));
+            setOrganization(mockOrganization);
+          }
         }
       } catch (error) {
         console.error("Failed to initialize auth:", error);
         localStorage.removeItem("auth_token");
+        localStorage.removeItem("user_data");
       } finally {
         setIsLoading(false);
       }
@@ -56,16 +92,38 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   const login = async (googleToken: string): Promise<boolean> => {
     try {
       setIsLoading(true);
-      const response = await authService.login(googleToken);
       
-      localStorage.setItem("auth_token", response.token);
-      setUser(response.user);
+      // Decode Google token to get email
+      const decoded: any = jwtDecode(googleToken);
+      const userEmail = decoded.email;
       
-      // Fetch organization data
-      // const org = await organizationService.getById(response.user.organizationId);
-      // setOrganization(org);
+      // Find user by email in mock data
+      const foundUser = mockUsers.find(u => u.email === userEmail);
       
-      return true;
+      if (foundUser) {
+        // Simulate successful login
+        localStorage.setItem("auth_token", googleToken);
+        localStorage.setItem("user_data", JSON.stringify(foundUser));
+        setUser(foundUser);
+        setOrganization(mockOrganization);
+        return true;
+      } else {
+        // Create new user for demo
+        const newUser = {
+          id: Date.now().toString(),
+          name: decoded.name || "New User",
+          email: userEmail,
+          role: "student" as const,
+          organizationId: "org1",
+          picture: decoded.picture || "https://via.placeholder.com/40"
+        };
+        
+        localStorage.setItem("auth_token", googleToken);
+        localStorage.setItem("user_data", JSON.stringify(newUser));
+        setUser(newUser);
+        setOrganization(mockOrganization);
+        return true;
+      }
     } catch (error) {
       console.error("Login failed:", error);
       return false;
@@ -74,16 +132,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     }
   };
 
-  const logout = async () => {
-    try {
-      await authService.logout();
-    } catch (error) {
-      console.error("Logout error:", error);
-    } finally {
-      localStorage.removeItem("auth_token");
-      setUser(null);
-      setOrganization(null);
-    }
+  const logout = () => {
+    localStorage.removeItem("auth_token");
+    localStorage.removeItem("user_data");
+    setUser(null);
+    setOrganization(null);
   };
 
   return (
